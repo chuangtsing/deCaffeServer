@@ -1,0 +1,46 @@
+#ifndef MOBILE_DEVICE_H
+#define MOBILE_DEVICE_H
+
+#include <string>
+#include <vector>
+#include <unistd.h>
+#include "protobuf/vanet_pb.pb.h"
+#include <chrono>
+#include "video.h"
+
+namespace vanet {
+
+
+typedef std::chrono::high_resolution_clock Time;
+typedef std::chrono::milliseconds MS;
+typedef std::chrono::duration<double> Duration;
+typedef std::chrono::system_clock::time_point TimePoint;
+
+class MobileDevice {
+
+	public:
+		MobileDevice(std::string , bool connect);
+
+		void set_ip(std::string ip) { this->ip = ip; };
+		void set_socket(int socket_fd) { this->socket_fd = socket_fd; };
+		int get_socket() { return socket_fd; };
+		
+		int open_connection();
+		bool send_message(const vanet_pb::ServerMessage&);
+		bool receive_message(vanet_pb::ClientMessage&);
+		bool send_resources(const google::protobuf::RepeatedField<int>& res);
+		bool send_file(int fd, long size);
+		long receive_video(std::string &path, const vanet_pb::ClientMessage &msg);
+		uint32_t read_varint();
+		void flush_socket();
+
+	private:
+		long mac_addr;
+		std::string ip;
+		int socket_fd;
+		bool status;
+		std::map<std::string, Video> vids;
+	};
+}
+
+#endif
